@@ -12,9 +12,6 @@ type ImageUploadPayload {
 }
 
 input ImageUploadInput {
-  image: Upload
+  fileName: String!
   clientMutationId: String
 }
-
-"""The `Upload` scalar type represents a file upload."""
-scalar Upload

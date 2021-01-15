@@ -11,8 +11,6 @@ import {
   QueryResponseCache,
   GraphQLResponse,
 } from "relay-runtime";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Platform } from "react-native";
 
 const getRequestBodyWithUploadables = (
   request: RequestParameters,
@@ -20,6 +18,9 @@ const getRequestBodyWithUploadables = (
   uploadables: UploadableMap
 ) => {
   let formData = new FormData();
+
+  formData.append("query", request.text);
+  formData.append("variables", JSON.stringify(variables));
   Object.keys(uploadables).forEach((key) => {
     if (Object.prototype.hasOwnProperty.call(uploadables, key)) {
       formData.append(key, uploadables[key]);
@@ -48,7 +49,7 @@ const getRequestBody = (
   return getRequestBodyWithoutUplodables(request, variables);
 };
 
-const GRAPHQL_URL = "https://ryzeapi.nuclius.com/graphql";
+const GRAPHQL_URL = "http://localhost:5000/graphql";
 
 async function fetchGraphQL(
   request: RequestParameters,
@@ -56,18 +57,11 @@ async function fetchGraphQL(
   _cacheConfig: CacheConfig,
   uploadables?: UploadableMap | null | undefined
 ): Promise<GraphQLResponse> {
-  const token = await AsyncStorage.getItem("token");
-  const csrfToken = await AsyncStorage.getItem("csrfToken");
   const body = getRequestBody(request, variables, uploadables);
-
   const headers = {
     ...(uploadables
       ? { Accept: "*/*" }
       : { Accept: "application/json", "Content-type": "application/json" }),
-    ...(token && { Authorization: token }),
-    ...(csrfToken && { ["X-CSRFToken"]: csrfToken }),
-    ["X-Client"]: Platform.OS,
-    Referer: "https://ryzeapi.nuclius.com/graphql",
   };
   const response = await fetch(GRAPHQL_URL, {
     method: "POST",
@@ -76,8 +70,6 @@ async function fetchGraphQL(
     body,
   });
   const result = await response.json();
-  console.log("variables ", variables);
-  console.log("result ", result);
   return result;
 }
 

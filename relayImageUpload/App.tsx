@@ -1,9 +1,13 @@
 import React from "react";
 
-import ImageUpload from "./src";
+import ImageUpload, { Root } from "./src";
 
 function App() {
-  return <ImageUpload />;
+  return (
+    <Root>
+      <ImageUpload />
+    </Root>
+  );
 }
 
 export default App;
